@@ -50,6 +50,10 @@ function Send-EmailAlert {
         [string]$Subject,
         [string]$Body
     )
+    if ($SmtpUser -eq "notifications@enterprise.com" -or $SmtpPass -eq "SecureSmtpPassword123") {
+        Write-AuditLog "WARNING" "Skipping SMTP email dispatch. Default dummy credentials ('notifications@enterprise.com') detected. Configure a real SMTP server in the dashboard configurator to receive alerts."
+        return $false
+    }
     Write-AuditLog "INFO" "Dispatching immediate critical email alert via SMTP ($SmtpServer)..."
     try {
         $SecurePass = ConvertTo-SecureString $SmtpPass -AsPlainText -Force

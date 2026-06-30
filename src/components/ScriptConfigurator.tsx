@@ -54,54 +54,54 @@ export default function ScriptConfigurator({ currentUserRole }: ScriptConfigurat
   // Update script dynamically
   useEffect(() => {
     let script = POWERSHELL_SCRIPT;
-    // Perform exact replacements of param values
+    // Perform exact replacements of param values using arrow functions to prevent "$" regex interpretation
     script = script.replace(
       /\[string\]\$SourceDir = "[^"]*"/,
-      `[string]$SourceDir = "${sourceDir.replace(/\\/g, "\\\\")}"`
+      () => `[string]$SourceDir = "${sourceDir.replace(/\\/g, "\\\\")}"`
     );
     script = script.replace(
       /\[string\]\$DestDir = "[^"]*"/,
-      `[string]$DestDir = "${destDir.replace(/\\/g, "\\\\")}"`
+      () => `[string]$DestDir = "${destDir.replace(/\\/g, "\\\\")}"`
     );
     script = script.replace(
       /\[string\]\$LogFile = "[^"]*"/,
-      `[string]$LogFile = "${logFile.replace(/\\/g, "\\\\")}"`
+      () => `[string]$LogFile = "${logFile.replace(/\\/g, "\\\\")}"`
     );
     script = script.replace(
       /\[string\]\$RetryQueueFile = "[^"]*"/,
-      `[string]$RetryQueueFile = "${queueFile.replace(/\\/g, "\\\\")}"`
+      () => `[string]$RetryQueueFile = "${queueFile.replace(/\\/g, "\\\\")}"`
     );
     script = script.replace(
       /\[string\]\$DashboardUrl = "[^"]*"/,
-      `[string]$DashboardUrl = "${apiUrl}"`
+      () => `[string]$DashboardUrl = "${apiUrl}"`
     );
     script = script.replace(
       /\[string\]\$ApiKey = "[^"]*"/,
-      `[string]$ApiKey = "${apiKey}"`
+      () => `[string]$ApiKey = "${apiKey}"`
     );
     script = script.replace(
       /\[string\]\$AgentId = "[^"]*"/,
-      `[string]$AgentId = "${agentId}"`
+      () => `[string]$AgentId = "${agentId}"`
     );
     script = script.replace(
       /\[string\]\$SmtpServer = "[^"]*"/,
-      `[string]$SmtpServer = "${smtpServer}"`
+      () => `[string]$SmtpServer = "${smtpServer}"`
     );
     script = script.replace(
       /\[int\]\$SmtpPort = \d+/,
-      `[int]$SmtpPort = ${smtpPort}`
+      () => `[int]$SmtpPort = ${smtpPort}`
     );
     script = script.replace(
       /\[string\]\$SmtpUser = "[^"]*"/,
-      `[string]$SmtpUser = "${smtpUser}"`
+      () => `[string]$SmtpUser = "${smtpUser}"`
     );
     script = script.replace(
       /\[string\]\$SmtpPass = "[^"]*"/,
-      `[string]$SmtpPass = "${smtpPass}"`
+      () => `[string]$SmtpPass = "${smtpPass}"`
     );
     script = script.replace(
       /\[string\]\$EmailRecipient = "[^"]*"/,
-      `[string]$EmailRecipient = "${recipient}"`
+      () => `[string]$EmailRecipient = "${recipient}"`
     );
 
     setCustomPsScript(script);
