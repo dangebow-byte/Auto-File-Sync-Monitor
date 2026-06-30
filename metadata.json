@@ -1,0 +1,6 @@
+{
+  "name": "Auto File Sync Monitor",
+  "description": "Administrative dashboard for monitoring automated local-to-server file sync agents, providing real-time diagnostics, role-based access control, log auditing, email alerts, and GDPR/HIPAA compliance tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
