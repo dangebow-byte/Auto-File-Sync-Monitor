@@ -61,19 +61,19 @@ export default function ScriptConfigurator({ currentUserRole }: ScriptConfigurat
     // Perform exact replacements of param values using arrow functions to prevent "$" regex interpretation
     script = script.replace(
       /\[string\]\$SourceDir = "[^"]*"/,
-      () => `[string]$SourceDir = "${sourceDir.replace(/\\/g, "\\\\")}"`
+      () => `[string]$SourceDir = "${sourceDir}"`
     );
     script = script.replace(
       /\[string\]\$DestDir = "[^"]*"/,
-      () => `[string]$DestDir = "${destDir.replace(/\\/g, "\\\\")}"`
+      () => `[string]$DestDir = "${destDir}"`
     );
     script = script.replace(
       /\[string\]\$LogFile = "[^"]*"/,
-      () => `[string]$LogFile = "${logFile.replace(/\\/g, "\\\\")}"`
+      () => `[string]$LogFile = "${logFile}"`
     );
     script = script.replace(
       /\[string\]\$RetryQueueFile = "[^"]*"/,
-      () => `[string]$RetryQueueFile = "${queueFile.replace(/\\/g, "\\\\")}"`
+      () => `[string]$RetryQueueFile = "${queueFile}"`
     );
     script = script.replace(
       /\[string\]\$DashboardUrl = "[^"]*"/,
@@ -89,11 +89,11 @@ export default function ScriptConfigurator({ currentUserRole }: ScriptConfigurat
     );
     script = script.replace(
       /\[string\]\$DestUser = "[^"]*"/,
-      () => `[string]$DestUser = "${destUser.replace(/\\/g, "\\\\")}"`
+      () => `[string]$DestUser = "${destUser}"`
     );
     script = script.replace(
       /\[string\]\$DestPass = "[^"]*"/,
-      () => `[string]$DestPass = "${destPass.replace(/\\/g, "\\\\")}"`
+      () => `[string]$DestPass = "${destPass}"`
     );
     script = script.replace(
       /\[string\]\$SmtpServer = "[^"]*"/,

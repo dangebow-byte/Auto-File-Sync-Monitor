@@ -30,6 +30,21 @@ param (
     [string]$EmailRecipient = "dangebow@gmail.com"
 )
 
+# Helper to normalize path slashes and handle UNC paths correctly
+function Normalize-PathSlashes {
+    param ([string]$RawPath)
+    if ([string]::IsNullOrWhiteSpace($RawPath)) { return $RawPath }
+    if ($RawPath -match "^\\+") {
+        return "\\" + ($RawPath -replace "^\\+", "" -replace "\\+", "\")
+    }
+    return $RawPath -replace "\\+", "\"
+}
+
+$SourceDir = Normalize-PathSlashes $SourceDir
+$DestDir = Normalize-PathSlashes $DestDir
+$LogFile = Normalize-PathSlashes $LogFile
+$RetryQueueFile = Normalize-PathSlashes $RetryQueueFile
+
 # Enforce TLS 1.2/1.3 for API calls
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
 
