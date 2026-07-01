@@ -164,7 +164,7 @@ if (![string]::IsNullOrWhiteSpace($DestUser)) {
         # Extract the base server / share path
         $ServerPath = $DestDir
         if ($DestDir.StartsWith("\\")) {
-            $Parts = $DestDir -split '\\'
+            $Parts = $DestDir.Split('\')
             if ($Parts.Length -ge 4) {
                 $ServerPath = "\\" + $Parts[2] + "\" + $Parts[3]
             }
