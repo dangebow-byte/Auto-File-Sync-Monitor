@@ -18,6 +18,10 @@ param (
     [string]$ApiKey = "sync_key_secure_105_7a9",
     [string]$AgentId = "agent-105",
     
+    # Optional SMB Network share Credentials
+    [string]$DestUser = "",
+    [string]$DestPass = "",
+    
     # SMTP Email Alerting Config
     [string]$SmtpServer = "smtp.office365.com",
     [int]$SmtpPort = 587,
@@ -144,6 +148,28 @@ function Save-RetryQueue {
 }
 
 # ==========================================
+# STEP 0: ESTABLISH SMB NETWORK SHARE CREDENTIALS (IF SPECIFIED)
+# ==========================================
+if (![string]::IsNullOrWhiteSpace($DestUser)) {
+    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
+    Add-Content -Path $LogFile -Value "[$Timestamp] [INFO] SMB network credentials specified. Mounting connection to: $DestDir as user $DestUser"
+    try {
+        # Extract the base server / share path
+        $ServerPath = $DestDir
+        if ($DestDir.StartsWith("\\")) {
+            $Parts = $DestDir -split '\\'
+            if ($Parts.Length -ge 4) {
+                $ServerPath = "\\" + $Parts[2] + "\" + $Parts[3]
+            }
+        }
+        & net.exe use $ServerPath /user:$DestUser $DestPass /persistent:no > $null 2>&1
+    }
+    catch {
+        # Standard graceful fallback
+    }
+}
+
+# ==========================================
 # STEP 1: TEST NETWORK PATH & FLUSH QUEUE
 # ==========================================
 $NetworkAvailable = Test-Path $DestDir
@@ -202,7 +228,9 @@ if ($NetworkAvailable) {
 # STEP 2: SYNCHRONIZE NEW SOURCE FILES
 # ==========================================
 if (Test-Path $SourceDir) {
-    $SourceFiles = Get-ChildItem -Path $SourceDir -File
+    $LogFileName = Split-Path $LogFile -Leaf
+    $QueueFileName = Split-Path $RetryQueueFile -Leaf
+    $SourceFiles = Get-ChildItem -Path $SourceDir -File | Where-Object { $_.Name -ne $LogFileName -and $_.Name -ne $QueueFileName }
     
     foreach ($File in $SourceFiles) {
         $SrcPath = $File.FullName

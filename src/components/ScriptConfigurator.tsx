@@ -31,6 +31,10 @@ export default function ScriptConfigurator({ currentUserRole }: ScriptConfigurat
   const [apiKey, setApiKey] = useState("sync_key_secure_105_7a9");
   const [agentId, setAgentId] = useState("agent-105");
 
+  // Optional Credentials for SMB Shared Destination Folder
+  const [destUser, setDestUser] = useState("");
+  const [destPass, setDestPass] = useState("");
+
   // Email Config
   const [smtpServer, setSmtpServer] = useState("smtp.office365.com");
   const [smtpPort, setSmtpPort] = useState("587");
@@ -84,6 +88,14 @@ export default function ScriptConfigurator({ currentUserRole }: ScriptConfigurat
       () => `[string]$AgentId = "${agentId}"`
     );
     script = script.replace(
+      /\[string\]\$DestUser = "[^"]*"/,
+      () => `[string]$DestUser = "${destUser.replace(/\\/g, "\\\\")}"`
+    );
+    script = script.replace(
+      /\[string\]\$DestPass = "[^"]*"/,
+      () => `[string]$DestPass = "${destPass.replace(/\\/g, "\\\\")}"`
+    );
+    script = script.replace(
       /\[string\]\$SmtpServer = "[^"]*"/,
       () => `[string]$SmtpServer = "${smtpServer}"`
     );
@@ -105,7 +117,7 @@ export default function ScriptConfigurator({ currentUserRole }: ScriptConfigurat
     );
 
     setCustomPsScript(script);
-  }, [sourceDir, destDir, logFile, queueFile, apiKey, agentId, apiUrl, smtpServer, smtpPort, smtpUser, smtpPass, recipient]);
+  }, [sourceDir, destDir, logFile, queueFile, apiKey, agentId, destUser, destPass, apiUrl, smtpServer, smtpPort, smtpUser, smtpPass, recipient]);
 
   const handleCopy = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
@@ -155,6 +167,29 @@ export default function ScriptConfigurator({ currentUserRole }: ScriptConfigurat
               onChange={(e) => setDestDir(e.target.value)}
               className="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dest SMB Username (Optional)</label>
+              <input
+                type="text"
+                placeholder="domain\username"
+                value={destUser}
+                onChange={(e) => setDestUser(e.target.value)}
+                className="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dest SMB Password (Optional)</label>
+              <input
+                type="password"
+                placeholder="Password"
+                value={destPass}
+                onChange={(e) => setDestPass(e.target.value)}
+                className="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
