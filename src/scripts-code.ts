@@ -148,11 +148,18 @@ function Save-RetryQueue {
 }
 
 # ==========================================
+# STEP 1: INITIALIZATION & LOG START
+# ==========================================
+Write-AuditLog "INFO" "Sync Run Initiated. Source: $SourceDir | Destination: $DestDir"
+$RetryQueue = Get-RetryQueue
+$CurrentQueueSize = $RetryQueue.Count
+Write-AuditLog "INFO" "Local retry queue loaded. Buffered items: $CurrentQueueSize"
+
+# ==========================================
 # STEP 0: ESTABLISH SMB NETWORK SHARE CREDENTIALS (IF SPECIFIED)
 # ==========================================
 if (![string]::IsNullOrWhiteSpace($DestUser)) {
-    $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss.fff"
-    Add-Content -Path $LogFile -Value "[$Timestamp] [INFO] SMB network credentials specified. Mounting connection to: $DestDir as user $DestUser"
+    Write-AuditLog "INFO" "SMB network credentials specified. Mounting connection to: $DestDir as user $DestUser"
     try {
         # Extract the base server / share path
         $ServerPath = $DestDir
@@ -162,22 +169,31 @@ if (![string]::IsNullOrWhiteSpace($DestUser)) {
                 $ServerPath = "\\" + $Parts[2] + "\" + $Parts[3]
             }
         }
-        & net.exe use $ServerPath /user:$DestUser $DestPass /persistent:no > $null 2>&1
+        
+        Write-AuditLog "INFO" "Attempting connection to remote share $ServerPath using specified credentials..."
+        # Force disconnect existing mapping first to prevent multiple-credential conflict errors (Error 1219)
+        & net.exe use $ServerPath /delete /y > $null 2>&1
+        
+        # Mount the connection and capture any errors/output
+        $NetOut = & net.exe use $ServerPath $DestPass "/user:$DestUser" /persistent:no 2>&1
+        $NetExitCode = $LASTEXITCODE
+        
+        if ($NetExitCode -ne 0) {
+            $CleanedNetOut = ($NetOut | Out-String).Trim()
+            Write-AuditLog "WARNING" "SMB mount failed. net.exe output: $CleanedNetOut"
+        } else {
+            Write-AuditLog "SUCCESS" "SMB network connection successfully established to $ServerPath."
+        }
     }
     catch {
-        # Standard graceful fallback
+        Write-AuditLog "FAIL" "An error occurred during SMB mount operation: $_"
     }
 }
 
 # ==========================================
-# STEP 1: TEST NETWORK PATH & FLUSH QUEUE
+# STEP 2: TEST NETWORK PATH & FLUSH QUEUE
 # ==========================================
 $NetworkAvailable = Test-Path $DestDir
-$RetryQueue = Get-RetryQueue
-$CurrentQueueSize = $RetryQueue.Count
-
-Write-AuditLog "INFO" "Sync Run Initiated. Source: $SourceDir | Destination: $DestDir"
-Write-AuditLog "INFO" "Local retry queue loaded. Buffered items: $CurrentQueueSize"
 
 if ($NetworkAvailable) {
     Write-AuditLog "INFO" "Destination network share verified online. Commencing automated queue flushing..."
